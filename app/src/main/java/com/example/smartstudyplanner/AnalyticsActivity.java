@@ -26,7 +26,7 @@ public class AnalyticsActivity extends AppCompatActivity {
 
             runOnUiThread(() -> {
                 tasksDone.setText("Tasks Created: " + tasks.size());
-                
+
                 // 25 minutes per session
                 long totalMinutes = sessions.size() * 25;
                 totalTime.setText("Total Study Time: " + totalMinutes + " mins");
