@@ -46,6 +46,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Tasks Completed: 0" />
+
+        <TextView
+            android:id="@+id/burnoutStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="Burnout Status: Checking..."
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>
