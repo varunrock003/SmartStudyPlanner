@@ -8,4 +8,5 @@ public class StudySession {
     @PrimaryKey(autoGenerate = true)
     public int id;
     public long timestamp;
+    public long durationMinutes;
 }

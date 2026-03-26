@@ -24,12 +24,15 @@ public class AnalyticsActivity extends AppCompatActivity {
             List<Task> tasks = db.taskDao().getAllTasks();
             List<StudySession> sessions = db.sessionDao().getAllSessions();
 
+            long totalMinutes = 0;
+            for (StudySession session : sessions) {
+                totalMinutes += session.durationMinutes;
+            }
+
+            final long finalMinutes = totalMinutes;
             runOnUiThread(() -> {
                 tasksDone.setText("Tasks Created: " + tasks.size());
-
-                // 25 minutes per session
-                long totalMinutes = sessions.size() * 25;
-                totalTime.setText("Total Study Time: " + totalMinutes + " mins");
+                totalTime.setText("Total Study Time: " + finalMinutes + " mins");
             });
         }).start();
     }
