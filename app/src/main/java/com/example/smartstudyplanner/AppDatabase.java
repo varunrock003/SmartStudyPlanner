@@ -1,29 +1,48 @@
 package com.example.smartstudyplanner;
 
 import android.content.Context;
-import androidx.room.Database;
-import androidx.room.Room;
-import androidx.room.RoomDatabase;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
-@Database(entities = {Task.class, StudySession.class}, version = 3)
-public abstract class AppDatabase extends RoomDatabase {
-    public abstract TaskDao taskDao();
-    public abstract SessionDao sessionDao();
+public class AppDatabase extends SQLiteOpenHelper {
+    private static final String DATABASE_NAME = "study-db";
+    private static final int DATABASE_VERSION = 3; // Incremented version to ensure clean state
 
-    private static volatile AppDatabase INSTANCE;
+    private static AppDatabase INSTANCE;
+    private final TaskDao taskDao;
+    private final SessionDao sessionDao;
 
-    public static AppDatabase getDatabase(final Context context) {
+    public AppDatabase(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.taskDao = new TaskDao_Impl(this);
+        this.sessionDao = new SessionDao_Impl(this);
+    }
+
+    public static synchronized AppDatabase getDatabase(Context context) {
         if (INSTANCE == null) {
-            synchronized (AppDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDatabase.class, "study-db")
-                            .fallbackToDestructiveMigration()
-                            .allowMainThreadQueries()
-                            .build();
-                }
-            }
+            INSTANCE = new AppDatabase(context.getApplicationContext());
         }
         return INSTANCE;
+    }
+
+    public TaskDao taskDao() {
+        return taskDao;
+    }
+
+    public SessionDao sessionDao() {
+        return sessionDao;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS Task (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, subject TEXT, deadline TEXT, isCompleted INTEGER)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS StudySession (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS Task");
+        db.execSQL("DROP TABLE IF EXISTS StudySession");
+        onCreate(db);
     }
 }

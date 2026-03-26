@@ -3,6 +3,7 @@ package com.example.smartstudyplanner;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,8 @@ public class AddTaskActivity extends AppCompatActivity {
 
     EditText title, subject, deadline;
     Button saveBtn;
+    TextView header;
+    int taskId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +24,24 @@ public class AddTaskActivity extends AppCompatActivity {
         subject = findViewById(R.id.subject);
         deadline = findViewById(R.id.deadline);
         saveBtn = findViewById(R.id.saveBtn);
+        header = findViewById(R.id.header);
+
+        taskId = getIntent().getIntExtra("TASK_ID", -1);
+
+        if (taskId != -1) {
+            header.setText("Edit Task");
+            saveBtn.setText("Update Task");
+            new Thread(() -> {
+                Task task = AppDatabase.getDatabase(this).taskDao().getTaskById(taskId);
+                if (task != null) {
+                    runOnUiThread(() -> {
+                        title.setText(task.title);
+                        subject.setText(task.subject);
+                        deadline.setText(task.deadline);
+                    });
+                }
+            }).start();
+        }
 
         saveBtn.setOnClickListener(v -> {
             String taskTitle = title.getText().toString();
@@ -32,15 +53,25 @@ public class AddTaskActivity extends AppCompatActivity {
                 return;
             }
 
-            Task task = new Task();
-            task.title = taskTitle;
-            task.subject = taskSubject;
-            task.deadline = taskDeadline;
-
             new Thread(() -> {
-                AppDatabase.getDatabase(this).taskDao().insert(task);
+                TaskDao taskDao = AppDatabase.getDatabase(this).taskDao();
+                if (taskId == -1) {
+                    Task task = new Task();
+                    task.title = taskTitle;
+                    task.subject = taskSubject;
+                    task.deadline = taskDeadline;
+                    taskDao.insert(task);
+                } else {
+                    Task task = taskDao.getTaskById(taskId);
+                    if (task != null) {
+                        task.title = taskTitle;
+                        task.subject = taskSubject;
+                        task.deadline = taskDeadline;
+                        taskDao.update(task);
+                    }
+                }
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Task Saved!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, taskId == -1 ? "Task Saved!" : "Task Updated!", Toast.LENGTH_SHORT).show();
                     finish();
                 });
             }).start();
