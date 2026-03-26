@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class AppDatabase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "study-db";
-    private static final int DATABASE_VERSION = 3; // Incremented version to ensure clean state
+    private static final int DATABASE_VERSION = 4; // Incremented version to ensure clean state and matches implementation
 
     private static AppDatabase INSTANCE;
     private final TaskDao taskDao;
@@ -36,7 +36,7 @@ public class AppDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS Task (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, subject TEXT, deadline TEXT, isCompleted INTEGER)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS StudySession (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS StudySession (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, durationMinutes INTEGER)");
     }
 
     @Override
