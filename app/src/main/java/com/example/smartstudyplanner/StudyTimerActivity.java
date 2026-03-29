@@ -1,5 +1,7 @@
 package com.example.smartstudyplanner;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -18,11 +20,15 @@ public class StudyTimerActivity extends AppCompatActivity {
     private boolean timerRunning;
     private long timeLeftInMillis = 1500000; // Default 25 min
     private long initialTimeInMillis = 1500000;
+    private int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_timer);
+
+        SharedPreferences sharedPref = getSharedPreferences("SmartStudyPref", Context.MODE_PRIVATE);
+        currentUserId = sharedPref.getInt("USER_ID", -1);
 
         timerText = findViewById(R.id.timerText);
         startBtn = findViewById(R.id.startBtn);
@@ -70,8 +76,9 @@ public class StudyTimerActivity extends AppCompatActivity {
                 increaseBtn.setEnabled(true);
                 decreaseBtn.setEnabled(true);
                 
-                // Save session to database
+                // Save session to database linked to the current user
                 StudySession session = new StudySession();
+                session.userId = currentUserId;
                 session.timestamp = System.currentTimeMillis();
                 session.durationMinutes = initialTimeInMillis / 60000;
                 

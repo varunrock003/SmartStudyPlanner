@@ -1,6 +1,8 @@
 package com.example.smartstudyplanner;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,9 +34,26 @@ public class LoginActivity extends AppCompatActivity {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
             } else {
-                // Proceed to Dashboard if fields are not empty
-                startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-                finish();
+                new Thread(() -> {
+                    AppDatabase db = AppDatabase.getDatabase(this);
+                    User user = db.userDao().login(email, password);
+                    
+                    runOnUiThread(() -> {
+                        if (user != null) {
+                            // Save user ID in SharedPreferences
+                            SharedPreferences sharedPref = getSharedPreferences("SmartStudyPref", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putInt("USER_ID", user.id);
+                            editor.apply();
+
+                            Toast.makeText(this, "Welcome " + user.name + "!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }).start();
             }
         });
 

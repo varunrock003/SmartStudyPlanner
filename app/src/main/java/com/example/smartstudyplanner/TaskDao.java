@@ -6,6 +6,6 @@ public interface TaskDao {
     void insert(Task task);
     void update(Task task);
     void delete(Task task);
-    List<Task> getAllTasks();
+    List<Task> getAllTasksForUser(int userId);
     Task getTaskById(int id);
 }

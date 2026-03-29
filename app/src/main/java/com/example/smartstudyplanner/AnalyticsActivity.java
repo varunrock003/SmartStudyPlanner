@@ -1,5 +1,7 @@
 package com.example.smartstudyplanner;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -11,11 +13,15 @@ import java.util.List;
 public class AnalyticsActivity extends AppCompatActivity {
 
     TextView totalTime, tasksDone, burnoutStatus;
+    private int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_analytics);
+
+        SharedPreferences sharedPref = getSharedPreferences("SmartStudyPref", Context.MODE_PRIVATE);
+        currentUserId = sharedPref.getInt("USER_ID", -1);
 
         totalTime = findViewById(R.id.totalTime);
         tasksDone = findViewById(R.id.tasksDone);
@@ -23,8 +29,9 @@ public class AnalyticsActivity extends AppCompatActivity {
 
         new Thread(() -> {
             AppDatabase db = AppDatabase.getDatabase(this);
-            List<Task> tasks = db.taskDao().getAllTasks();
-            List<StudySession> sessions = db.sessionDao().getAllSessions();
+            // Fetch only tasks and sessions belonging to the current user
+            List<Task> tasks = db.taskDao().getAllTasksForUser(currentUserId);
+            List<StudySession> sessions = db.sessionDao().getAllSessionsForUser(currentUserId);
 
             long totalMinutes = 0;
             for (StudySession session : sessions) {
