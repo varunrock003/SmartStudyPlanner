@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface SessionDao {
     void insert(StudySession session);
-    List<StudySession> getAllSessions();
+    List<StudySession> getAllSessionsForUser(int userId);
 }

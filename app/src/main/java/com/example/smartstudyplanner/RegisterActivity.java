@@ -30,8 +30,25 @@ public class RegisterActivity extends AppCompatActivity {
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Registered Successfully!", Toast.LENGTH_SHORT).show();
-                finish();
+                new Thread(() -> {
+                    AppDatabase db = AppDatabase.getDatabase(this);
+                    User existingUser = db.userDao().getUserByEmail(email);
+                    
+                    if (existingUser != null) {
+                        runOnUiThread(() -> Toast.makeText(this, "User already exists!", Toast.LENGTH_SHORT).show());
+                    } else {
+                        User user = new User();
+                        user.name = name;
+                        user.email = email;
+                        user.password = password;
+                        db.userDao().insert(user);
+                        
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Registered Successfully!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    }
+                }).start();
             }
         });
     }
